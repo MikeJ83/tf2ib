@@ -149,6 +149,8 @@ def analyseIRCText(connection, event):
         adminList[userCommand.split()[0]] = int(userCommand.split()[4].replace('\x02', ''))
     if re.match('^\\\\!', escapedUserCommand):
     # Check if the user is trying to pass a command to the bot.
+    	escapedUserCommand = escapedUserCommand.lower()
+    	userCommand = userCommand.lower()
         if isAdminCommand(userName, escapedUserCommand):
             if isAdmin(userName):
             #Execute the admin command.
@@ -1632,6 +1634,7 @@ irc.add_global_handler('nick', nickchange)
 irc.add_global_handler('part', drop)
 irc.add_global_handler('pubmsg', pubmsg)
 irc.add_global_handler('privnotice', pubmsg)
+irc.add_global_handler('privmsg', pubmsg)
 irc.add_global_handler('pubnotice', pubmsg)
 irc.add_global_handler('quit', drop)
 irc.add_global_handler('welcome', welcome)
