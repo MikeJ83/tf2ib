@@ -111,9 +111,13 @@ def addFriend(userName, userCommand):
 
 def addGame(userName, userCommand):
     resetVariables()
-    global allowFriends, classList, gameServer, lastGameType, state, userLimit
+    global allowFriends, classList, gameServer, lastGameType, state, userLimit, mapList, nextMap
     if not setIP(userName, userCommand):
         return 0
+    
+    # Set the next map
+    nextMap = mapList[random.randint(0, (len(mapList) - 1))]
+    
     # Game type.
     if re.search('captain', userCommand):
         allowFriends = 0
@@ -452,6 +456,12 @@ def executeCommand(userName, escapedUserCommand, userCommand):
     if re.search('^\\\\!whattimeisit', escapedUserCommand):
         send("PRIVMSG " + channel + " :\x038,01* \x039,01Hammertime \x038,01*")
         return 0
+    if re.search('^\\\\!nextmap', escapedUserCommand):
+    	if state != 'idle':
+        	send("PRIVMSG " + channel + " :\x030,01The next map that will be played is: " + nextMap)
+        else:
+        	send("PRIVMSG " + channel + " :\x030,01You must wait until the next game is added.")
+        return 0
 
 def extractClasses(userCommand):
     global classList
@@ -600,10 +610,6 @@ def getLastTimeMedic(userName):
     for row in cursor.fetchall():
         return row[0]
     return 0
-
-def getMap():
-    global mapList
-    return mapList[random.randint(0, (len(mapList) - 1))]
 
 def getMedicRatioColor(medicRatio):
     if medicRatio >= 7:
@@ -895,11 +901,11 @@ def initGame():
         players(nick)
 
 def initServer():
-    global gameServer, lastGame, rconPassword
+    global gameServer, lastGame, rconPassword, nextMap
     try:
         lastGame = time.time()
         TF2Server = SRCDS.SRCDS(string.split(gameServer, ':')[0], int(string.split(gameServer, ':')[1]), rconPassword, 10)
-        TF2Server.rcon_command('changelevel ' + getMap())
+        TF2Server.rcon_command('changelevel ' + nextMap)
     except:
         return 0
 
@@ -1592,6 +1598,7 @@ lastGameType = "captain"
 lastLargeOutput = time.time()
 lastUserPrint = time.time()
 mapList = ["cp_badlands", "cp_coldfront", "cp_gullywash_imp3", "cp_freight_final1", "cp_granary", "koth_viaduct"]
+nextMap = ''
 maximumUserLimit = 16
 minuteTimer = time.time()
 nominatedCaptains = []
@@ -1608,7 +1615,7 @@ scrambleList = []
 startGameTimer = threading.Timer(0, None)
 subList = []
 tf2ibPassword = ''
-userCommands = ["\\!add", "\\!addfriend", "\\!addfriends", "\\!away", "\\!captain", "\\!game", "\\!ip", "\\!last", "\\!limit", "\\!man", "\\!mumble", "\\!ninjadd", "\\!notice", "\\!pick", "\\!players", "\\!protect", "\\!ready", "\\!remove", "\\!scramble", "\\!stats", "\\!sub", "\\!votemap", "\\!whattimeisit"]
+userCommands = ["\\!add", "\\!addfriend", "\\!addfriends", "\\!away", "\\!captain", "\\!game", "\\!ip", "\\!last", "\\!limit", "\\!man", "\\!mumble", "\\!ninjadd", "\\!notice", "\\!pick", "\\!players", "\\!protect", "\\!ready", "\\!remove", "\\!scramble", "\\!stats", "\\!sub", "\\!votemap", "\\!whattimeisit", "\\!nextmap"]
 userLimit = 16
 userList = {}
 voiceServer = {'ip':'mumble.tf2pug.org', 'port':'64738'}
